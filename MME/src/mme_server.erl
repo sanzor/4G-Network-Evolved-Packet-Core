@@ -19,7 +19,8 @@ init(Args)->
 handle_info(Args,State)->
     {ok,State}.
 
-handle_cast(Message,State)->
+handle_cast({update,Table,Key},State)->
+    db:
     {noreply,State}.
 
 handle_call(Message,From,State)->

@@ -5,6 +5,6 @@
 
 start({distributed},Args)->
     {ok,Pid}=mme_main_sup:start(Args),
-    {ok,pid}.
+    {ok,Pid}.
 
 stop(Reason)->ok.
