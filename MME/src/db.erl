@@ -1,5 +1,7 @@
 -module(db).
--export([createUser/1,readPosition/1,readUser/1,updatePosition/1,updateUser/1,deleteUser/1,deletePosition/1,install/1]).
+-export([ install/1,
+          getUser/1,createUser/1,updateUser/1,deleteUser/1,
+          readPosition/1,updatePosition/1,deletePosition/1]).
 
 -record(position,{
     id,
@@ -31,18 +33,23 @@ delete(Table,Id)->
 read(Table,Id)->
     mnesia:dirty_read(Table, Id).
 
+getUser(Id)->
+    case read(users,Id) of
+        [] -> undefined;
+        User -> User
+    end.
+        
 createUser(Record=#user{id=Id})->
-    case readUser(Id) of
+    case getUser(Id) of
         [] -> updateUser(Record);
         _ -> throw(io:format("User with ~p already exists",[Id]))
-    end.
+    end,
+    update(users,Record).
 updateUser(Record)->
     update(users,Record).
 updatePosition(Record)->
     update(positions,Record).
 
-readUser(Id)->
-    read(users,Id).
 readPosition(Id)->
     read(positions,Id).
 deleteUser(Id)->
