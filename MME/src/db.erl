@@ -1,7 +1,8 @@
 -module(db).
--export([ install/1,
-          getUser/1,createUser/1,updateUser/1,deleteUser/1,
-          readPosition/1,updatePosition/1,deletePosition/1]).
+-export([install/1,
+          getUser/1,getPosition/1,
+          writeUser/1,deleteUser/1,
+          readPosition/1,writePosition/1,deletePosition/1]).
 
 -record(position,{
     id,
@@ -25,7 +26,7 @@ install(Nodes)->
     create_database().
     
 
-update(Table,Record)->
+write(Table,Record)->
     mnesia:dirty_write(Table,Record).
 delete(Table,Id)->
     mnesia:dirty_delete(Table,Id).
@@ -38,20 +39,33 @@ getUser(Id)->
         [] -> undefined;
         User -> User
     end.
-        
-createUser(Record=#user{id=Id})->
-    case getUser(Id) of
-        [] -> updateUser(Record);
-        _ -> throw(io:format("User with ~p already exists",[Id]))
-    end,
-    update(users,Record).
-updateUser(Record)->
-    update(users,Record).
-updatePosition(Record)->
-    update(positions,Record).
 
-readPosition(Id)->
-    read(positions,Id).
+getPosition(Id)->
+    case read(positions,Id) of
+        [] -> undefined;
+        Position ->Position
+    end.
+
+
+tryWrite(Record,Func,Table) when is_function(Func)->
+    case Func(Record) of 
+        [] -> write(Table,Record);
+        _ -> throw(io:format("Record from table : ~p Already exists",[Table]))
+    end.
+tryUpdate(Record,Func,Table)->
+    case Func(Record) of 
+        [] -> throw(io:format("Record ~p table: does not exist",[Record]));
+        _ ->  write(users,Record)
+    end.
+writeUser(Record=#user{id=Id})->tryWrite(Record, fun(Id)->getUser(Id) end, users).
+writePosition(Record=#position{id=Id})->tryWrite(Record, fun(Id)->getPosition(Id) end, positions).
+updateUser(Record=#user{id=Id})->
+    case getUser(Id) of
+        [] -> throw(io:format("User with ~p does not exist",[Id]));
+        _ ->  write(users,Record)
+    end.
+
+
 deleteUser(Id)->
     delete(users,Id).
 
