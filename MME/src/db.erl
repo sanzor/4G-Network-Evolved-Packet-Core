@@ -1,8 +1,7 @@
 -module(db).
--export([install/1,
-          getUser/1,getPosition/1,
-          writeUser/1,deleteUser/1,
-          readPosition/1,writePosition/1,deletePosition/1]).
+-export([ install/1,
+          getUser/1,writeUser/1,updateUser/1,deleteUser/1,
+          getPosition/1,writePosition/1,deletePosition/1]).
 
 -record(position,{
     id,
@@ -55,15 +54,13 @@ tryWrite(Record,Func,Table) when is_function(Func)->
 tryUpdate(Record,Func,Table)->
     case Func(Record) of 
         [] -> throw(io:format("Record ~p table: does not exist",[Record]));
-        _ ->  write(users,Record)
+        _ ->  write(Table,Record)
     end.
-writeUser(Record=#user{id=Id})->tryWrite(Record, fun(Id)->getUser(Id) end, users).
-writePosition(Record=#position{id=Id})->tryWrite(Record, fun(Id)->getPosition(Id) end, positions).
-updateUser(Record=#user{id=Id})->
-    case getUser(Id) of
-        [] -> throw(io:format("User with ~p does not exist",[Id]));
-        _ ->  write(users,Record)
-    end.
+writeUser(Record=#user{id=Id})->tryWrite(Record, fun()->getUser(Id) end, users).
+updateUser(Record=#user{id=Id})->tryUpdate(Record, fun()->getUser(Id) end, users).
+writePosition(Record=#position{id=Id})->tryWrite(Record, fun()->getPosition(Id) end, positions).
+
+   
 
 
 deleteUser(Id)->

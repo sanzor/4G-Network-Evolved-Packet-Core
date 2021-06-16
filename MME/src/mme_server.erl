@@ -29,9 +29,20 @@ handle_cast({update,Table,Key},State)->
     {noreply,State};
 
 handle_cast({create_user,{Id,Name,Number}},State)->
-    db:createUser(#user{id=Id,name=Name,number=Number}),
+    db:writeUser(#user{id=Id,name=Name,number=Number}),
+    {noreply,State};
+handle_cast({update_user,{Id,Name,Number}},State)->
+    db:updateUser(#user{id=Id,name=Name,number=Number}),
+    {noreply,State};
+handle_cast({update_position,{Id,Lat,Lng}},State)->
+    db:writePosition(#position{id=Id,lat=Lat,lng=Lng}),
     {noreply,State}.
-handle_cast({update_user,{Id,Name,Number}})->
-    db:updateUser(#user{id=Id,name=Name,number=Number})
+
+handle_call({get_user,Id},From,State)->
+    Reply=db:getUser(Id),
+    {reply,Reply,State};
+handle_call({get_position,Id},From,State)->
+    Reply=db:getPosition(Id),
+    {reply,Reply,State};
 handle_call(Message,From,State)->
     {reply,State,State}.
