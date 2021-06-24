@@ -1,22 +1,22 @@
 -module(mme_main_sup).
 -behaviour(supervisor).
--export([start/1,init/1]).
+-export([start_link/0,init/1]).
+-define(NAME,?MODULE).
 
-
-start(Args)->
-    {ok,Pid}=supervisor:start_link({local,?MODULE}, ?MODULE, Args),
+start_link()->
+    {ok,Pid}=supervisor:start_link({local,?NAME},?NAME,[]),
     {ok,Pid}.
 
 
 
 
-init(Args)->
-    Strategy={one_for_all,2000,3},
+init([])->
+    Strategy={one_for_all,0,1},
     ChildSpec=[
         mme_server,
         {mme_server,start_link,[]},
         permanent,
-        2000,
+        brutal_kill,
         worker,
         [mme_server]
     ],

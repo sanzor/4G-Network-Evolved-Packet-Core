@@ -5,7 +5,7 @@
             {description,"Application that CRUD operations over the user database"},
             {vsn,"1.0.0"},
             {applications,[stdlib,kernel]},
-            {modules,[mme_app,mme_main_sup,mme_server]},
+            {modules,[mme_app,mme_main_sup,mme_server,db]},
             {registered,[mme_server,mme_main_sup]},
             {mod,[mme_app]}
         ]
