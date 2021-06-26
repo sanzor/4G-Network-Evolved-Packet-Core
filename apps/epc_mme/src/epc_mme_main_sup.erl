@@ -1,4 +1,4 @@
--module(mme_main_sup).
+-module(epc_mme_main_sup).
 -behaviour(supervisor).
 -export([start_link/0,init/1]).
 -define(NAME,?MODULE).
@@ -12,12 +12,12 @@ start_link()->
 
 init([])->
     Strategy={one_for_all,0,1},
-    ChildSpec=[
-        mme_server,
-        {mme_server,start_link,[]},
+    ChildSpec=[{
+        epc_mme_server,
+        {epc_mme_server,start_link,[33]},
         permanent,
         brutal_kill,
         worker,
-        [mme_server]
+        [epc_mme_server]}
     ],
     {ok,{Strategy,ChildSpec}}.
