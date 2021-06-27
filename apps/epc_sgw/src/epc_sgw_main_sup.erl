@@ -9,5 +9,13 @@ start_link()->
     {ok,Pid}.
 
 init([])->
-    
-    {ok,}
+    Strategy={one_for_all,0,1},
+    ChildSpec=[{
+        epc_sgw_server,
+        {epc_sgw_server,start_link,[33]},
+        permanent,
+        brutal_kill,
+        worker,
+        [epc_sgw_server]}
+    ],
+    {ok,{Strategy,ChildSpec}}.
