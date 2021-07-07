@@ -21,12 +21,10 @@ init(_)->
 handle_info(Args,State)->
     {ok,State}.
 
-handle_cast({update,Table,Key},State)->
-    case Table of 
-        users -> db:updateUser(Key);
-        positions-> db:updatePosition(Key)
-    end,
+handle_cast({update,Table,Record},State)->
+    epc_mme_db:update_table_option(Table,Record),
     {noreply,State};
+
 
 handle_cast({create_user,{Id,Name,Number}},State)->
     epc_mme_db:writeUser(#user{id=Id,name=Name,number=Number}),
@@ -46,3 +44,6 @@ handle_call({get_position,Id},From,State)->
     {reply,Reply,State};
 handle_call(Message,From,State)->
     {reply,State,State}.
+
+update_table_option(users,Record)->db:updateUser(Record);
+update_table_option(positions,Record)->db:updatePosition(Record).   

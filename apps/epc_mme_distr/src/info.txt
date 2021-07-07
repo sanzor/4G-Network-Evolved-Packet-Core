@@ -1,0 +1,48 @@
+Mnesia depends on the schema, but Mnesia should also create the schema.
+This sets up a weird situation where the
+schema needs to be created by Mnesia
+without running Mnesia first! Fortunately,
+it’s rather simple to deal with this in practice. We just need to call the function
+mnesia:create_schema(ListOfNodes) before starting Mnesia. It will create a bunch of files on each node, storing all the table
+information required. You don’t need to be connected to the other nodes
+when calling the function, but the nodes need to be running; the function
+will set up the connections and get everything working for you.
+By default, the schema will be created in the current working directory,
+wherever the Erlang node is running. To change this, the Mnesia application
+has a dir variable that can be set to pick where the schema will be stored. You
+can start your node as erl -name SomeName -mnesia dir where/to/store/the/db, or
+set it dynamically with application:set_env(mnesia, dir, "where/to/store/the/db").
+n o t e A schema may fail to be created because one already exists, Mnesia is running on one
+of the nodes the schema should be on, you can’t write to the directory Mnesia wants to
+write to, or another common file-handling problem occurred.
+Once the schema has been created, we can start Mnesia and begin creating tables. The function mnesia:create_table/2 is what we need to use for
+this task. It takes two arguments: the table name and a list of options. The
+following are some of the options available:
+{attributes, List}
+This is a list of all the items in a table. By default, it takes the
+form [key, value], meaning you would need a record of the form
+-record(TableName, {key,val}). to work. Pretty much everyone cheats a
+little and uses a special construct (a compiler-supported macro) that
+extracts the element names from a record. The construct looks like
+a function call. To do it with our friends record, we would pass it as
+{attributes, record_info(fields, mafiapp_friends)}.
+{disc_copies, NodeList}, {disc_only_copies, NodeList}, and {ram_copies, NodeList}
+This is where you specify how to store the tables, as explained in the
+previous section. Note that you can have many of these options present
+at once. As an example, you could define a table to be stored on disk and
+RAM on your master node, only in RAM on all of the slaves, and only on
+disk on a dedicated backup node by using all three of the options.
+{index, ListOfIntegers}
+Mnesia tables let you have indexes on top of the basic ETS and DETS
+functionality. This is useful in cases where you are planning to build
+searches on record fields other than the primary key. As an example,
+our friends table will need an index for the expertise field. We can declare
+such an index as {index, [#mafiapp_friends.expertise]}. In general—and518 Chapter 29
+this is true for many, many databases—you want to build indexes only
+on fields where the data is not too similar across all records. On a
+table with hundreds of thousands of entries, if your index at best splits
+your table in two groups to sort through, indexing will take a lot of
+resources (RAM and processor time) for very little benefit. An index
+that would split the same table in N groups of 10 or fewer elements, as
+an example, would be more useful for the resources it uses. Note that
+you do not need to put an index on the first field of the record (the second element of the tuple), as this is done for you by default

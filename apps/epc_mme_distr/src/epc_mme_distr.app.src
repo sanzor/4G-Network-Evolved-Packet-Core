@@ -7,6 +7,7 @@
             {applications,[stdlib,kernel]},
             {modules,[epc_mme__distr_app,epc_mme_distr_main_sup]},
             {registered,[epc_mme_distr_main_sup]},
-            {mod,{epc_mme_distr_app,[]}}
+            {mod,{epc_mme_distr_app,[]}},
+            {env,[{nodetype,disk}]}
         ]
 }.

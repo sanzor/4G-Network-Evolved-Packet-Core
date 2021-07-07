@@ -17,13 +17,19 @@ create_database()->
     mnesia:create_table(users,[{attributes,record_info(fields,user)},{record_name,user}]),
     mnesia:create_table(positions,[{attributes,record_info(fields,position)},{record_name,position}]).
 
-install(Nodes)->
-    rpc:multicall(Nodes,application, start, [mnesia]),
-    mnesia:create_schema(Nodes),
+
+  
+      
+install()->
+    mnesia:create_schema([node()]),
+    application:start(mnesia),
     create_database().
+
+
+
 start(normal,[])->
     {ok,Pid}=epc_mme_main_sup:start_link(),
-    epc_mme_db:install([node()]),
+    epc_mme_db:install(),
     {ok,Pid}.
 
 start({takeover,_OtherNode})->
