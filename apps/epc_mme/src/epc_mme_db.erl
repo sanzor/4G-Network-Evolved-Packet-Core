@@ -47,8 +47,8 @@ tryUpdate(Record,Func,Table)->
         [] -> throw(io:format("Record ~p table: does not exist",[Record]));
         _ ->  write(Table,Record)
     end.
-writeUser(Record=#user{id=Id})->tryWrite(Record, fun()->getUser(Id) end, users).
-updateUser(Record=#user{id=Id})->tryUpdate(Record, fun()->getUser(Id) end, users).
+writeUser(Record=#user{id=Id})->tryWrite(Record, fun(R)->getUser(R#user.id) end, users).
+updateUser(Record=#user{id=Id})->tryUpdate(Record, fun(R)->getUser(R#user.id) end, users).
 writePosition(Record=#position{id=Id})->tryWrite(Record, fun()->getPosition(Id) end, positions).
 
    
