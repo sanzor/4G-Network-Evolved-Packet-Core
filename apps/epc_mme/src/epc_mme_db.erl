@@ -36,20 +36,9 @@ getPosition(Id)->
         Position ->Position
     end.
 
-
-tryWrite(Record,Func,Table) when is_function(Func)->
-    case Func(Record) of 
-        [] -> write(Table,Record);
-        _ -> throw(io:format("Record from table : ~p Already exists",[Table]))
-    end.
-tryUpdate(Record,Func,Table)->
-    case Func(Record) of 
-        [] -> throw(io:format("Record ~p table: does not exist",[Record]));
-        _ ->  write(Table,Record)
-    end.
-writeUser(Record=#user{id=Id})->tryWrite(Record, fun(R)->getUser(R#user.id) end, users).
-updateUser(Record=#user{id=Id})->tryUpdate(Record, fun(R)->getUser(R#user.id) end, users).
-writePosition(Record=#position{id=Id})->tryWrite(Record, fun()->getPosition(Id) end, positions).
+writeUser(Record=#user{id=Id})->write(users,Record).
+updateUser(Record=#user{id=Id})->write(users,Record).
+writePosition(Record=#position{id=Id})->write(positions,Record).
 
    
 

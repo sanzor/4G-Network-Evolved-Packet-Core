@@ -14,21 +14,20 @@
     number
 }).
 create_database()->
-    case mnesia:create_table(users,[{ram_copies,[node()]},
-                                {disc_only_copies,[node()|nodes()]},
+    case mnesia:create_table(users,[
+                                {disc_copies,[node()|nodes()]},
                                 {attributes,record_info(fields,user)},
                                 {record_name,user}]) of
                                 {atomic,ok} ->ok;
                                 {already_exists,Table}->io:format("Table ~p exists",[Table]);
-                                {aborted,Reason}->io:format("\nCould not create table  ~p exists ",[Reason])
+                                {aborted,Reason}->io:format("\nCould not create table , Reason: ~p ",[Reason])
                                end,
     case mnesia:create_table(positions,[{attributes,record_info(fields,position)},
-                                   {ram_copies,[node()]},
-                                   {disc_only_copies,[node()|nodes()]},
-                                   {record_name,position}]) of
+                                {disc_copies,[node()|nodes()]},
+                                {record_name,position}]) of
                                 {atomic,ok} ->ok;
                                 {already_exists,T}->io:format("Table ~p exists",[T]);
-                                {aborted,R}->io:format("\nCould not create table  ~p exists ",[R])
+                                {aborted,R}->io:format("\nCould not create table, Reason:  ~p",[R])
                                    end.
 
 

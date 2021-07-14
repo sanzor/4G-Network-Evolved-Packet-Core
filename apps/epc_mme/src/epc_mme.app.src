@@ -5,7 +5,7 @@
             {description,"Application that CRUD operations over the user database"},
             {vsn,"1.0.0"},
             {applications,[stdlib,kernel,epc_mme_distr]},
-            {modules,[epc_mme_app,epc_mme_main_sup,epc_mme_server,epc_mme_db]},
+            {modules,[epc_mme_app,epc_mme_main_sup,epc_mme_db_server,epc_mme_db]},
             {registered,[epc_mme_server,epc_mme_main_sup]},
             {mod,{epc_mme_app,[]}}
         ]
