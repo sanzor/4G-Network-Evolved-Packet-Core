@@ -15,15 +15,17 @@
     number
 }).
     
-
+-spec write(Table::atom(),term())->ok.
 write(Table,Record)->
     mnesia:dirty_write(Table,Record).
+-spec delete(Table::atom(),term())->ok.
 delete(Table,Id)->
     mnesia:dirty_delete(Table,Id).
 
 read(Table,Id)->
     mnesia:dirty_read(Table, Id).
 
+-spec getUser(Id::term())->term().
 getUser(Id)->
     case read(users,Id) of
         [] -> undefined;
