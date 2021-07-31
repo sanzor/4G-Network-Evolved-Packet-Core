@@ -17,8 +17,8 @@ start_link()->
 init(_)->
     {ok,#state{}}.
 
-authorize(UserData)->
-    gen_server:call(?SERVER, {authorize,UserData}, ?TIMEOUT).
+connect(UserData)->
+    gen_server:call(?SERVER, {connect,UserData}, ?TIMEOUT).
 
 updatePosition(UserPositionData)->
     gen_server:cast(?SERVER, {update_upos,UserPositionData}).
@@ -29,7 +29,7 @@ updatePosition(UserPositionData)->
 handle_cast({update_upos,UPos},State)->
     {noreply,State}.
 
-handle_call({update_upos,UPos},From,State)->
+handle_call({connect,UserData},From,State)->
     Reply=[],
     {reply,Reply,State}.
 

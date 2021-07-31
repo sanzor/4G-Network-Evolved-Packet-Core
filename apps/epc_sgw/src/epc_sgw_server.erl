@@ -7,16 +7,24 @@
 %%----API
 -record(state,{
     cmap,
-    sock
+    sock,
+    userSessions
 }).
 
+%API
+
+-type sessionData() ::{userId:string(),route:string()}.
+-spec createSession(session:sessionData())->atom().
+
+createSession(Session)->
+    gen_server:cast(?SERVER,{create_session,Session}).
 start_link()->
     gen_server:start_link({local,?SERVER}, ?MODULE, [], []).
 
 registerChild(Pid)->
     gen_server:cast(?SERVER, {newpid,Pid}).
 init(_)->
-    {ok,#state{},0}.
+    {ok,#state{userSessions=dict:new()},0}.
 
 
 %callbacks
@@ -37,6 +45,12 @@ handle_info({'Down',Ref,Pid,_,Reason},State)->
 handle_cast({newpid,Pid},State)->
     Ref=erlang:monitor(process,Pid),
     {noreply,State#state{cmap=dict:store(Ref,Pid,State#state.cmap)}}.
+
+
+handle_cast({create_session,Session},State)->
+
+
+    
 
 handle_call({filter,Filter},_,State)->
     {reply,dict:filter(Filter,State#state.cmap),State}.
