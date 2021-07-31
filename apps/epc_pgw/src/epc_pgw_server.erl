@@ -1,4 +1,4 @@
--module(epc_sgw_server).
+-module(epc_pgw_server).
 -behaviour(gen_server).
 -export([start_link/0,registerChild/1]).
 -export([init/1,handle_cast/2]).
