@@ -1,6 +1,6 @@
 -module(epc_mme_db_server).
 -behaviour(gen_server).
--export([createUser/1,updateUser/1,getUser/1,getPosition/1]).
+-export([createUser/1,updateUser/1,updatePosition/1,getUser/1,getPosition/1]).
 -export([start_link/1,init/1,handle_call/3,handle_cast/2,handle_info/2]).
 -define(SERVER,?MODULE).
 
@@ -58,4 +58,4 @@ handle_call(Message,From,State)->
     {reply,State,State}.
 
 update_table_option(users,Record)->epc_mme_db:updateUser(Record);
-update_table_option(positions,Record)->epc_mme_db:updatePosition(Record).   
+update_table_option(positions,Record)->epc_mme_db:writePosition(Record).   

@@ -1,6 +1,7 @@
 -module(epc_mme_server).
 -behaviour(supervisor).
 -export([start_link/0,init/1]).
+-export([updatePosition/1,authorize/1]).
 -export([handle_cast/2,handle_call/3]).
 
 -define(SERVER,?MODULE).
@@ -17,8 +18,8 @@ start_link()->
 init(_)->
     {ok,#state{}}.
 
-connect(UserData)->
-    gen_server:call(?SERVER, {connect,UserData}, ?TIMEOUT).
+authorize(UserData)->
+    gen_server:call(?SERVER, {authorize,UserData}, ?TIMEOUT).
 
 updatePosition(UserPositionData)->
     gen_server:cast(?SERVER, {update_upos,UserPositionData}).
@@ -27,9 +28,10 @@ updatePosition(UserPositionData)->
 % 
 % 
 handle_cast({update_upos,UPos},State)->
+    epc_mme_db_server:updatePosition(UPos),
     {noreply,State}.
 
-handle_call({connect,UserData},From,State)->
+handle_call({authorize,UserData},From,State)->
     Reply=[],
     {reply,Reply,State}.
 

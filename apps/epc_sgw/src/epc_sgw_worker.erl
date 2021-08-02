@@ -25,3 +25,5 @@ handle_info(timeout,State)->
     epc_sgw_server:registerChild(Pid),
     {noreply,State#state{socket=Sock}}.
 
+handle_info({tcp,Socket,Message},State)->
+    
