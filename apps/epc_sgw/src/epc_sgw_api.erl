@@ -1,2 +1,7 @@
 -module(epc_sgw_api).
--export([])
+-export([]).
+
+
+
+register(UserId)->
+    epc_sgw_server:
