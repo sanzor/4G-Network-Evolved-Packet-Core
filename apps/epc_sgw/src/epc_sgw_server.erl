@@ -20,19 +20,18 @@ start_link()->
 
 
 % called by workers 
-registerChild(Pid,Uid)->
-    gen_server:cast(?SERVER, {newpid,Pid,Uid}).
+registerChild(Pid)->
+    gen_server:cast(?SERVER, {newpid,Pid}).
 init(_)->
     {ok,#state{sessions=dict:new()},0}.
 
 
 %callbacks
 
-handle_info(timeout,State=#state{socket=S})->
+handle_info(timeout,State=#state{sock=S})->
     Pid=startFirstChild(S),
-    {ok,Session=#session{}}=epc_sgw_session_cache:getSession(Uid, Dict),
     Dict=dict:store(erlang:monitor(process, Pid),Pid,dict:new()),
-    {noreply,State#state{sock=LSock,sessions=Dict}};
+    {noreply,State#state{sessions=Dict}};
 
 
 handle_info({'Down',Ref,Pid,_,Reason},State)->

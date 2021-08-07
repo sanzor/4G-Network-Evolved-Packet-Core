@@ -1,4 +1,4 @@
--module(epc_sgw_session_cache).
+-module(epc_sgw_registry).
 -behaviour(gen_server).
 
 -export([start_link/0,init/1]).

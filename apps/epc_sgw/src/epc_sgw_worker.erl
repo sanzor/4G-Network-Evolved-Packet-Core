@@ -1,11 +1,12 @@
 -module(epc_sgw_worker).
 -behaviour(gen_server).
 
--export([init/1,handle_cast/2,handle_call/3,handle_info/2,terminate/2]).
+-export([init/1,handle_info/2]).
 -export([start_link/1]).
 -define(NAME,?MODULE).
 -record(state,{
     socket,
+    ref,
     messages=[]
     }).
 
@@ -23,7 +24,23 @@ handle_info(timeout,State)->
     {ok,Sock}=gen_tcp:accept(State#state.socket),
     {ok,Pid}=epc_sgw_worker_sup:start_child(State#state.socket),
     epc_sgw_server:registerChild(Pid),
-    {noreply,State#state{socket=Sock}}.
+    Ref=update_global_registry(),
+    {noreply,State#state{socket=Sock,ref=Ref}};
 
 handle_info({tcp,Socket,Message},State)->
+    {noreply,State}.
     
+
+update_global_registry()->
+     Uid=fetch_user_data(),
+     Ref=make_ref(),
+     epc_sgw_registry:update_session({Uid,Ref,self()}),
+     Ref.
+
+
+fetch_user_data()->
+        Uid=receive 
+        {id,U}->U;
+            _ -> exit(normal)
+        end,
+        Uid.
