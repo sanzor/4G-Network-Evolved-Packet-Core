@@ -1,0 +1,13 @@
+> dbg:start().   % start dbg
+> dbg:tracer().  % start a simple tracer process
+> dbg:tp(Module, Function, Arity, []).   % specify MFA you are interested in
+> dbg:p(all, c).   % trace calls (c) of that MFA for all processes.
+
+... trace here
+
+> dbg:stop_clear().   % stop tracer and clear effect of tp and p calls.
+
+> dbg:p(all, c).   % trace calls to selected functions by all functions
+> dbg:p(new, c).   % trace calls by processes spawned from now on
+> dbg:p(Pid, c).   % trace calls by given process
+> dbg:p(Pid, [c, m]).  % trace calls and messages of a given processepc
