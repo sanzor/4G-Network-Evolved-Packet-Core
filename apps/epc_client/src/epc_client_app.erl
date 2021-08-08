@@ -1,4 +1,4 @@
--module(epc_api).
+-module(epc_client_app).
 -behaviour(application).
 -export([start/1]).
 

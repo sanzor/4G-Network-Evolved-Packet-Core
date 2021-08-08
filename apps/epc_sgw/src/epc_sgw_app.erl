@@ -1,4 +1,4 @@
--module(epc_sgw).
+-module(epc_sgw_app).
 -behaviour(application).
 -export([start/2,stop/1]).
 
