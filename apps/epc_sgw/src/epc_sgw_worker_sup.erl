@@ -1,6 +1,6 @@
 -module(epc_sgw_worker_sup).
 -behaviour(supervisor).
-
+-export([start_link/0,init/1]).
 
 -define(NAME,?MODULE).
 start_link()->
@@ -11,3 +11,16 @@ start_link()->
 
 %---callbacks---------
 
+init(_)->
+    Strategy={simple_one_for_one,0,1},
+    ChildSpec=[
+        #{
+            id=>epc_sgw_worker,
+            start=>{epc_sgw_worker,start_link,[]},
+            restart=>temporary,
+            shutdown=>brutal_kill,
+            mod=>[epc_sgw_worker],
+            type=>worker
+        }
+    ],
+    {ok,{Strategy,ChildSpec}}.

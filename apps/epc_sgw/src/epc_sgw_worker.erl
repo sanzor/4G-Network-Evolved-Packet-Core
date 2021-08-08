@@ -10,6 +10,8 @@
     messages=[]
     }).
 
+    %%%% API
+    %%% 
 start_link(Lsock)->
     gen_server:start_link(?NAME,[Lsock],[]).
 
@@ -18,7 +20,7 @@ init([Lsock])->
     {ok,#state{socket=Lsock},0}.
 
 
-%callbacks
+%%%%%%%%%%%%%% callbacks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 handle_info(timeout,State)->
     {ok,Sock}=gen_tcp:accept(State#state.socket),

@@ -10,10 +10,7 @@
     sock
 }).
 
-
-%API
-createSession(UserId,Route)->
-    gen_server:cast(?SERVER,{register,{UserId,Route}}).
+%%%%%%%%%%%%%% API %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 start_link()->
     gen_server:start_link({local,?SERVER}, ?MODULE, [], []).
@@ -26,8 +23,10 @@ init(_)->
     {ok,#state{sessions=dict:new()},0}.
 
 
-%callbacks
+%%%%%%%%%%%%% Callbacks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
+%% Initialization
 handle_info(timeout,State=#state{sock=S})->
     Pid=startFirstChild(S),
     Dict=dict:store(erlang:monitor(process, Pid),Pid,dict:new()),

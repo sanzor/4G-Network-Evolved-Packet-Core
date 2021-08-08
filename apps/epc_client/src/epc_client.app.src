@@ -1,0 +1,10 @@
+{
+    application,
+    epc_client,
+    [
+        {description,"client that uses epc "},
+        {vsn,"1.0.0"},
+        {applications,[]},
+        {env,[{portnr,8081},{address,"127.0.0.1"}]}
+    ]
+}.
