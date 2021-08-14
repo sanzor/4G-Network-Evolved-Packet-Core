@@ -4,6 +4,8 @@
 
 
 start(normal,[])->
+    {ok,RegPid}=epc_sgw_registry:start_link(),
+    io:format("Started registry: ~p ",[RegPid]),
     {ok,Pid}=epc_sgw_main_sup:start_link(),
     {ok,Pid}.
 

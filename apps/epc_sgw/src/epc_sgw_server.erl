@@ -1,7 +1,7 @@
 -module(epc_sgw_server).
 -behaviour(gen_server).
 -export([start_link/0,registerChild/1]).
--export([init/1,handle_cast/2]).
+-export([init/1,handle_cast/2,handle_info/2]).
 
 -define(SERVER,?MODULE).
 %%----API

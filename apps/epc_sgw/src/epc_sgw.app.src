@@ -4,7 +4,14 @@
     [
         {description,"Package gateway that facilitates communication between radio tower and Internet at large"},
         {vsn,"0.0.1"},
-        {modules,[epc_sgw_app,epc_sgw_main_sup,epc_sgw_registry,epc_sgw_server,epc_sgw_worker_sup,epc_sgw_worker]},
-        {env,[{listenPort,8081},{address,"127.0.0.1"}]}
-    ]
+        {modules,[epc_sgw_app,
+                  epc_sgw_main_sup,
+                  epc_sgw_registry,
+                  epc_sgw_server,
+                  epc_sgw_worker_sup,
+                  epc_sgw_worker]},
+        {env,[{listenPort,8081},{address,"127.0.0.1"}]},
+        {applications,[stdlib,kernel]},
+        {mod,{epc_sgw_app,[]}}
+   ]
 }.
