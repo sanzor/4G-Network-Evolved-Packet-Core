@@ -9,7 +9,8 @@
                   epc_sgw_registry,
                   epc_sgw_server,
                   epc_sgw_worker_sup,
-                  epc_sgw_worker]},
+                  epc_sgw_worker,
+                  epc_sgw_api]},
         {env,[{listenPort,8081},{address,"127.0.0.1"}]},
         {applications,[stdlib,kernel]},
         {mod,{epc_sgw_app,[]}}

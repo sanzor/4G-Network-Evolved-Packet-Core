@@ -31,7 +31,14 @@ handle_cast({update_upos,UPos},State)->
     epc_mme_db_server:updatePosition(UPos),
     {noreply,State}.
 
-handle_call({authorize,UserData},From,State)->
+handle_call({authorize,Uid},From,State)->
+    try
+    epc_sgw_api:create_session(Uid),
     Reply=[],
+    catch
+        Error:Reason -> ok
+    end,
+
+   
     {reply,Reply,State}.
 
