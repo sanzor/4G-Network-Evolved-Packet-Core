@@ -12,13 +12,13 @@ init([])->
     
     Strategy={one_for_all,0,1},
     ChildSpec=[
-        #{
-            id=>epc_sgw_server,
-            start=>{epc_sgw_server,start_link,[]},
-            restart=>permanent,
-            shutdown=>brutal_kill,
-            type=>worker,
-            mod=>[epc_sgw_server]
+        {
+            epc_sgw_registry,
+            {epc_sgw_registry,start_link,[]},
+            permanent,
+            brutal_kill,
+            worker,
+            [epc_sgw_registry]
         },
         {
             epc_sgw_worker_sup,
@@ -27,6 +27,14 @@ init([])->
             brutal_kill,
             supervisor,
             [epc_sgw_main_sup] 
+        },
+        #{
+            id=>epc_sgw_server,
+            start=>{epc_sgw_server,start_link,[]},
+            restart=>permanent,
+            shutdown=>brutal_kill,
+            type=>worker,
+            mod=>[epc_sgw_server]
         }
     ],
     {ok,{Strategy,ChildSpec}}.

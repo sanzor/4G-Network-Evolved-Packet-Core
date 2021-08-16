@@ -31,14 +31,15 @@ handle_cast({update_upos,UPos},State)->
     epc_mme_db_server:updatePosition(UPos),
     {noreply,State}.
 
-handle_call({authorize,Uid},From,State)->
-    try
-    epc_sgw_api:create_session(Uid),
-    Reply=[],
-    catch
-        Error:Reason -> ok
-    end,
-
-   
+handle_call({authorize,UserData={UserId,Name,Number}},From,State)->
+    epc_mme_db_server:saveUser(UserData),
+    epc_sgw_api:create_user_session(UserId),
+    SessionResult=epc_sgw_api:get_user_session(UserId),
+    Reply=handle_get_session_result(SessionResult),
     {reply,Reply,State}.
 
+handle_get_session_result(Session)->
+    handle_session_option(Session).
+
+handle_session_option({not_found,Node})->{user_not_found,Node};
+handle_session_option({found,Node,Value})->{user_found,Value}.

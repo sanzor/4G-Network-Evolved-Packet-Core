@@ -1,6 +1,6 @@
 -module(epc_mme_db_server).
 -behaviour(gen_server).
--export([createUser/1,updateUser/1,updatePosition/1,getUser/1,getPosition/1]).
+-export([saveUser/1,updateUser/1,updatePosition/1,getUser/1,getPosition/1]).
 -export([start_link/1,init/1,handle_call/3,handle_cast/2,handle_info/2]).
 -define(SERVER,?MODULE).
 
@@ -13,7 +13,7 @@ start_link(Args)->
     {ok,Pid}.
 
 
-createUser(UserData)->
+saveUser(UserData)->
     gen_server:cast(?SERVER,{create_user, UserData}).
 
 updateUser(UserData)->

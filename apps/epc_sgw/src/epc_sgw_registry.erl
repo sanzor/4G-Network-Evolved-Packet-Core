@@ -33,6 +33,7 @@ get_session(Uid)->
 
 start_link()->
     {ok,Pid}=gen_server:start_link({global,?NAME}, ?MODULE, [], []),
+    global:register_name(?NAME, Pid),
     {ok,Pid}.
 
 init(Args)->
@@ -52,7 +53,7 @@ handle_cast({update_session,{Uid,Ref,Pid}},State=#state{dict=Dict})->
     {noreply,State#state{dict=NewDict}}.
 
 handle_call({get_session,Uid},From,State)->
-    Result=dict:find(Uid,State#state.dict),
+    Result=get_session_option(Uid,State#state.dict),
     {reply,Result,State}.
 
 
@@ -63,8 +64,16 @@ create_option({ok,Value},Uid,Dict)->Dict;
 create_option(error,Uid,Dict)->
     dict:store(Uid,#session{}, Dict).
 
+    
 update_session({Uid,Ref,Pid},Dict)->
     dict:update(Uid,fun(Old)->Old#session{ref=Ref,pid=Pid} end, Dict).
+
+
+
+get_session_option(Value,Dict)->get_option(dict:find(Value,Dict)).
+get_option(_)->{not_found,node()};
+get_option({ok,Value})->{found,node(),Value}.
+
 
 
 

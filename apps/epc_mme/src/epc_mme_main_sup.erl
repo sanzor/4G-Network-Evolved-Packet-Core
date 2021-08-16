@@ -12,12 +12,21 @@ start_link()->
 
 init([])->
     Strategy={one_for_all,0,1},
-    ChildSpec=[{
+    ChildSpec=[
+        {
         epc_mme_db_server,
         {epc_mme_db_server,start_link,[33]},
         permanent,
         brutal_kill,
         worker,
-        [epc_mme_db_server]}
+        [epc_mme_db_server]},
+        {
+          epc_mme_server,
+          {epc_mme_server,start_link,[]},
+          permanent,
+          3000,
+          worker,
+          [epc_mme_server]   
+        }
     ],
     {ok,{Strategy,ChildSpec}}.
