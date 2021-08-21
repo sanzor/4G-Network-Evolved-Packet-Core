@@ -33,7 +33,7 @@ handle_info(timeout,State=#state{sock=S})->
     {noreply,State#state{sessions=Dict}};
 
 
-handle_info({'Down',Ref,Pid,_,Reason},State)->
+handle_info({'Down',Ref,process,_,Reason},State)->
     erlang:demonitor(Ref),
     NewDict=dict:erase(Ref,State#state.sessions),
     {noreply,State#state{sessions=NewDict}}.
