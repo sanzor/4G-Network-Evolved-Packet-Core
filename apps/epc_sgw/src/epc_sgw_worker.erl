@@ -4,6 +4,7 @@
 -export([init/1,handle_info/2,handle_call/3,terminate/2,handle_cast/2]).
 -export([start_link/1]).
 -define(NAME,?MODULE).
+-define(MESSAGES,<<131,100,0,8,109,101,115,115,97,103,101,115>>).
 -record(state,{
     socket,
     ref,
@@ -39,7 +40,7 @@ handle_info(timeout,State)->
     {noreply,State#state{socket=Sock,ref=Ref}};
 
 
-handle_info({tcp,Socket,<<"messages">>},State)->
+handle_info({tcp,Socket,?MESSAGES},State)->
     gen_tcp:send(Socket, term_to_binary(State#state.messages)),
     {noreply,State};
 handle_info({tcp,Socket,Message},State)->
@@ -48,13 +49,18 @@ handle_info({tcp,Socket,Message},State)->
 handle_info({tcp,Socket,Message},State)->
     io:format("Into socket"),
     Reply=handle(Message, State),
-    gen_tcp:send(Reply,State#state.socket),
-    {noreply,State}.
+    gen_tcp:send(State#state.socket,Reply),
+    {noreply,State};
 
+handle_info(Message, State)->
+    io:format("Could not handle message,out of band : ~p",[Message]),
+    {noreply,State}.
 terminate(socket_closed,State)->
     io:format("Socket closed"),
     ok;
-terminate(Reason,State)->ok.
+terminate(Reason,State)->
+    io:format("terminating,reason:~p",[Reason]),
+    ok.
 
 
 update_global_registry()->
@@ -65,7 +71,7 @@ update_global_registry()->
 
 handle(Message,State)->
     Reply=handle_message(Message,State),
-    Raw=term_to_binary(Reply),
+    Raw=erlang:term_to_binary(Reply),
     Raw.
 
 handle_message(<<"messages">>,State)->
