@@ -1,7 +1,7 @@
 -module(epc_sgw_worker).
 -behaviour(gen_server).
 
--export([init/1,handle_info/2,handle_call/3]).
+-export([init/1,handle_info/2,handle_call/3,terminate/2,handle_cast/2]).
 -export([start_link/1]).
 -define(NAME,?MODULE).
 -record(state,{
@@ -42,13 +42,20 @@ handle_info(timeout,State)->
 handle_info({tcp,Socket,<<"messages">>},State)->
     gen_tcp:send(Socket, term_to_binary(State#state.messages)),
     {noreply,State};
-
+handle_info({tcp,Socket,Message},State)->
+    gen_tcp:send(Socket,term_to_binary({can_not_process,Message})),
+    {noreply,State};
 handle_info({tcp,Socket,Message},State)->
     io:format("Into socket"),
     Reply=handle(Message, State),
-    gen_tcp:send(Reply,Socket),
+    gen_tcp:send(Reply,State#state.socket),
     {noreply,State}.
-    
+
+terminate(socket_closed,State)->
+    io:format("Socket closed"),
+    ok;
+terminate(Reason,State)->ok.
+
 
 update_global_registry()->
      Uid=fetch_user_data(),
