@@ -3,8 +3,8 @@
 
 
 
-authorize(UserId)->
-    epc_mme_server:authorize(UserId).
+authorize(UserData)->
+    epc_mme_server:authorize(UserData).
 
 updatePosition({UserId,Lat,Lng})->
     epc_mme_server:updatePosition({UserId,Lat,Lng}).

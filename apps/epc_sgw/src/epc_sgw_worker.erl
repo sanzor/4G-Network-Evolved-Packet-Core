@@ -5,6 +5,7 @@
 -export([start_link/1]).
 -define(NAME,?MODULE).
 -define(MESSAGES,<<131,100,0,8,109,101,115,115,97,103,101,115>>).
+-define(AUTH_TIMEOUT,5000).
 -record(state,{
     socket,
     ref,
@@ -31,21 +32,23 @@ handle_info({tcp_closed,_},State)->
     {stop,socket_closed,State};
 
 handle_info(timeout,State)->
-   
+    
     {ok,Sock}=gen_tcp:accept(State#state.socket),
-   
+    
     {ok,Pid}=epc_sgw_worker_sup:start_child(State#state.socket),
-    epc_sgw_server:registerChild(Pid),
-    Ref=update_global_registry(),
+    try_update_registry(),
+    Ref=try_update_registry(),
     {noreply,State#state{socket=Sock,ref=Ref}};
 
 
 handle_info({tcp,Socket,?MESSAGES},State)->
     gen_tcp:send(Socket, term_to_binary(State#state.messages)),
     {noreply,State};
+
 handle_info({tcp,Socket,Message},State)->
     gen_tcp:send(Socket,term_to_binary({can_not_process,Message})),
     {noreply,State};
+
 handle_info({tcp,Socket,Message},State)->
     io:format("Into socket"),
     Reply=handle(Message, State),
@@ -63,8 +66,16 @@ terminate(Reason,State)->
     ok.
 
 
-update_global_registry()->
-     Uid=fetch_user_data(),
+try_update_registry()->
+    try update_registry() of
+         Ref -> Ref
+    catch
+         Error:Reason->exit({update_registry_fail,{Error,Reason}})
+    end.
+        
+update_registry()->
+    
+     Uid=wait_user_data(),
      Ref=make_ref(),
      epc_sgw_registry:update_session({Uid,Ref,self()}),
      Ref.
@@ -83,9 +94,11 @@ handle_message(<<"ref">>,State)->
 handle_message(Request,State)->
     {generic_reply,State}.
 
-fetch_user_data()->
+wait_user_data()->
         Uid=receive 
         {id,U}->U;
-            _ -> exit(normal)
+            _ -> throw(invalid_mme_response)
+        after ?AUTH_TIMEOUT ->
+            throw(mme_timeout)
         end,
         Uid.
