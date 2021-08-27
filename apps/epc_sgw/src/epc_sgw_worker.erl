@@ -96,8 +96,7 @@ handle_message(Request,State)->
 
 wait_user_data()->
         Uid=receive 
-        {id,U}->U;
-            _ -> throw(invalid_mme_response)
+        {id,U}->U
         after ?AUTH_TIMEOUT ->
             throw(mme_timeout)
         end,

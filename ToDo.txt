@@ -9,3 +9,7 @@ mme responsibilities:
 to do:
 -figure out how to split concerns (sgw-pgw lists management,area list management, user actions via eUtran)
 -would i need a SOA approach based on processes accessing different mnesia tables?
+
+todo2:
+replace mnesia with an ETS with a global process
+change dictionary with an ETS
