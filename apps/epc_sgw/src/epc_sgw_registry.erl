@@ -48,22 +48,18 @@ init(Args)->
 %%%%------------callbacks---------------------
 %%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+handle_call({create_session,Uid},From,State)->
+    Reply=ets_create_session(Uid),
+    {reply,Reply,State};
 
-handle_cast({create_session,Uid},State)->
-    ets_create_session(Uid),
-    {noreply,State};
+handle_call({get_session,Uid},From,State)->
+    Value=get_session_option(Uid),
+    {reply,Value,State}.
 
 handle_cast({update_session,{Uid,Ref,Pid}},State)->
     ets_update_session({Uid,Ref,Pid}),
     {noreply,State}.
 
-handle_call({get_session,Uid},From,State)->
-    Value=get_session_option(Uid),
-    {reply,Value,State};
-
-handle_call({create_session,Uid},From,State)->
-    Reply=ets_create_session(Uid),
-    {reply,Reply,State}.
 
 %%%%%-------------methods----------------------
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

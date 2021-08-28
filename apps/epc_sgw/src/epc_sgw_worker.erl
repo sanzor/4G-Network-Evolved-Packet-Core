@@ -11,6 +11,7 @@
     uid,
     socket,
     ref,
+    isVerified=false,
     messages=[]
     }).
 
@@ -35,20 +36,21 @@ handle_info({tcp_closed,_},State)->
 
 handle_info(timeout,State)->
     {ok,Sock}=gen_tcp:accept(State#state.socket),
-     %% write the logic to read from socket the UID 
-     %% match UID from first message with registry
-     %% let socket connection do the magic
-     %gen_tcp:recv(Sock,?MAX_PAYLOAD_SIZE)
     {ok,Pid}=epc_sgw_worker_sup:start_child(State#state.socket),
-    
-   
-    {noreply,State#state{socket=Sock,ref=Ref}};
+    {noreply,State#state{socket=Sock}};
+
+
+
+handle_info({tcp,Socket,{verify,Uid}})->
+    epc_sgw_registry:get_session(Uid)
 
 
 handle_info({tcp,Socket,?MESSAGES},State)->
     gen_tcp:send(Socket, term_to_binary(State#state.messages)),
     {noreply,State};
 
+handle_info({tcp,Socket,Message},State=#state{isVerified=V}) when V=:=false ->
+    gen_tcp:close(Socket);
 handle_info({tcp,Socket,Message},State)->
     gen_tcp:send(Socket,term_to_binary({can_not_process,Message})),
     {noreply,State};
@@ -69,19 +71,19 @@ terminate(Reason,State)->
     io:format("terminating,reason:~p",[Reason]),
     ok.
 
-
-try_update_registry()->
-    try update_registry() of
+%%%%%%%%%%%%%%%%%%%%%%%%% helper methods %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% 
+try_update_registry(Uid)->
+    try update_registry(Uid) of
          Ref -> Ref
     catch
          Error:Reason->exit({update_registry_fail,{Error,Reason}})
     end.
-        
-update_registry()->
-     Uid=wait_user_data(),
-     Ref=make_ref(),
-     epc_sgw_registry:update_session({Uid,Ref,self()}),
-     Ref.
+
+update_registry(Uid)->
+    Ref=make_ref(),
+    epc_sgw_registry:update_session({Uid,Ref,self()}),
+    Ref.
 
 handle(Message,State)->
     Reply=handle_message(Message,State),
@@ -96,11 +98,3 @@ handle_message(<<"ref">>,State)->
 
 handle_message(Request,State)->
     {generic_reply,State}.
-
-wait_user_data()->
-        Uid=receive 
-        {id,U}->U
-        after ?AUTH_TIMEOUT ->
-            throw(mme_timeout)
-        end,
-        Uid.
