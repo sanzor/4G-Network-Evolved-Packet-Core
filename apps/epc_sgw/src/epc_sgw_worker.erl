@@ -5,8 +5,10 @@
 -export([start_link/1]).
 -define(NAME,?MODULE).
 -define(MESSAGES,<<131,100,0,8,109,101,115,115,97,103,101,115>>).
+-define(MAX_PAYLOAD_SIZE,1024).
 -define(AUTH_TIMEOUT,5000).
 -record(state,{
+    uid,
     socket,
     ref,
     messages=[]
@@ -32,12 +34,14 @@ handle_info({tcp_closed,_},State)->
     {stop,socket_closed,State};
 
 handle_info(timeout,State)->
-    
     {ok,Sock}=gen_tcp:accept(State#state.socket),
-    
+     %% write the logic to read from socket the UID 
+     %% match UID from first message with registry
+     %% let socket connection do the magic
+     %gen_tcp:recv(Sock,?MAX_PAYLOAD_SIZE)
     {ok,Pid}=epc_sgw_worker_sup:start_child(State#state.socket),
-    try_update_registry(),
-    Ref=try_update_registry(),
+    
+   
     {noreply,State#state{socket=Sock,ref=Ref}};
 
 
@@ -74,7 +78,6 @@ try_update_registry()->
     end.
         
 update_registry()->
-    
      Uid=wait_user_data(),
      Ref=make_ref(),
      epc_sgw_registry:update_session({Uid,Ref,self()}),
