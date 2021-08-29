@@ -36,21 +36,15 @@ handle_info({tcp_closed,_},State)->
 
 handle_info(timeout,State)->
     {ok,Sock}=gen_tcp:accept(State#state.socket),
-    {ok,Pid}=epc_sgw_worker_sup:start_child(State#state.socket),
+    {ok,_}=epc_sgw_worker_sup:start_child(State#state.socket),
     {noreply,State#state{socket=Sock}};
 
 
 
-handle_info({tcp,Socket,{verify,Uid}})->
-    epc_sgw_registry:get_session(Uid)
+handle_info({tcp,Socket,Message},State)->
+    NewState=handle_socket_message(Message,State),
+    {noreply,NewState};
 
-
-handle_info({tcp,Socket,?MESSAGES},State)->
-    gen_tcp:send(Socket, term_to_binary(State#state.messages)),
-    {noreply,State};
-
-handle_info({tcp,Socket,Message},State=#state{isVerified=V}) when V=:=false ->
-    gen_tcp:close(Socket);
 handle_info({tcp,Socket,Message},State)->
     gen_tcp:send(Socket,term_to_binary({can_not_process,Message})),
     {noreply,State};
@@ -73,6 +67,29 @@ terminate(Reason,State)->
 
 %%%%%%%%%%%%%%%%%%%%%%%%% helper methods %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% 
+%%% 
+handle_socket_message(Raw,State)->
+    Message=binary_to_term(Raw),
+    handle_message(Message, State).
+
+
+handle_message({verify,Uid},State)->
+    Verified=case epc_sgw_registry:get_session(Uid) of
+                    {not_found,_}-> gen_tcp:close(Socket),
+                                    exit(normal,could_not_verify);
+                    {found,_}->true
+              end,
+    State#state{isVerified=Verified};
+
+handle_message(_,State) when State#state.isVerified=:=false->
+    gen_tcp:close(State#state.socket),
+    exit({normal,verification_required});
+
+handle_message(messages,State)->
+    gen_tcp:send(State#state.socket,term_to_binary(State#state.messages)),
+    State.
+
+
 try_update_registry(Uid)->
     try update_registry(Uid) of
          Ref -> Ref
