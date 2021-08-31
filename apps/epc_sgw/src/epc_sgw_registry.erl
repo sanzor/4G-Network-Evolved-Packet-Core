@@ -15,9 +15,9 @@
 -define(NAME,?MODULE).
 -define(TABLE,user_table).
 -record(session,{
+    uid=not_set,
     pid=not_set,
-    ref=not_set,
-    route
+    ref=not_set
 }).
 -record(state,{
    table
@@ -25,7 +25,6 @@
 
 %%%%--------------------------API-------------------------------
 %%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
  
 create_session(Uid)->
     gen_server:call({global,?NAME},{create_session,Uid}).
@@ -70,7 +69,11 @@ ets_create_session(Uid)->
     end.
    
 ets_update_session({Uid,Ref,Pid})->
-    ets:insert(Uid,#session{ref=Ref,pid=Pid}).
+    case ets:lookup(?TABLE,Uid) of
+        [] ->throw("Could not find element");
+        _->ets:insert(?TABLE,#session{uid=Uid,ref=Ref,pid=Pid})
+    end.
+    
 
 get_session_option(Uid)->
     get_option(ets:lookup(?TABLE, Uid)).
