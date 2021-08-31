@@ -63,7 +63,7 @@ handle_cast({update_session,{Uid,Ref,Pid}},State)->
 %%%%%-------------methods----------------------
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ets_create_session(Uid)->
-    case ets:insert_new(?TABLE, {Uid,#session{}}) of
+    case ets:insert_new(?TABLE, #session{uid=Uid}) of
         true -> {session_created,Uid};
         false -> {session_exists,Uid}
     end.
