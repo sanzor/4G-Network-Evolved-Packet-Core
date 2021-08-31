@@ -78,7 +78,7 @@ ets_update_session({Uid,Ref,Pid})->
 get_session_option(Uid)->
     get_option(ets:lookup(?TABLE, Uid)).
 
-get_option([{_,Value}|_])->{found,Value};
+get_option([{_,Value,_,_}|_])->{found,Value};
 get_option([])->{not_found,[]}.
 
 
