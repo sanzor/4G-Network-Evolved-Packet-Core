@@ -41,7 +41,7 @@ start_link()->
     {ok,Pid}.
 
 init(Args)->
-    {ok,#state{table=ets:new(?TABLE,[set,named_table])}}.
+    {ok,#state{table=ets:new(?TABLE,[set,named_table,{keypos,#session.uid}])}}.
 
 
 %%%%------------callbacks---------------------
@@ -69,9 +69,9 @@ ets_create_session(Uid)->
     end.
    
 ets_update_session({Uid,Ref,Pid})->
-    case ets:lookup(?TABLE,Uid) of
-        [] ->throw("Could not find element");
-        _->ets:insert(?TABLE,#session{uid=Uid,ref=Ref,pid=Pid})
+    case ets:lookup(?TABLE, Uid) of
+        [] -> throw(element_not_found);
+        [_]->ets:insert(?TABLE,#session{uid=Uid,ref=Ref,pid=Pid})
     end.
     
 
