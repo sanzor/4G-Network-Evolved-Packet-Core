@@ -3,7 +3,6 @@
         epc_mme,
         [
             {description,"Application that CRUD operations over the user database"},
-            
             {applications,[stdlib,kernel,epc_mme_distr]},
             {vsn,"0.0.1"},
             {modules,[epc_mme_app,epc_mme_main_sup,epc_mme_db_server,epc_mme_db,epc_mme_api]},

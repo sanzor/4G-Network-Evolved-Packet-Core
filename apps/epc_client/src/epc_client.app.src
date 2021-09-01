@@ -1,10 +1,14 @@
 {
-    application,
-    epc_client,
-    [
-        {description,"client that uses epc "},
-        {vsn,"1.0.0"},
-        {applications,[stdlib,kernel]},
-        {env,[{portnr,8081},{address,"127.0.0.1"}]}
-    ]
+     application,epc_client,
+     [{description,"client to communciate with the epc "},
+      {applications,[stdlib,kernel,epc_mme,epc_sgw]},
+      {author,"bercovici adrian"},
+      {vsn,"0.1.1"},
+      {modules,[epc_client_app]},
+      {mod,{epc_client_app,[]}},
+      {env,[{userId,33},
+            {printerPath,"out.txt"},
+            {connectPort,8081},
+            {address,'127.0.0.1'}]}
+     ]
 }.
