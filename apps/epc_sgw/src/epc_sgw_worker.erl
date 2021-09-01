@@ -4,8 +4,8 @@
 
 
 -export([init/1,handle_info/2,handle_call/3,terminate/2,handle_cast/2]).
-
-
+-define(tb(X),term_to_binary(X)).
+-define(fb(X),binary_to_term(Msg)).
 -export([start_link/1]).
 
 
@@ -70,13 +70,15 @@ handle_socket_message(Raw,State)->
 
 handle_message({verify,Uid},State)->
     Verified=case epc_sgw_registry:get_session(Uid) of
-                    {not_found,_}-> gen_tcp:close(State#state.socket),
+                    {not_found,_}-> gen_tcp:send(State#state.socket,term_to_binary({user_not_found,Uid,"Closing socket shortly...."})),
+                                    gen_tcp:close(State#state.socket),
                                     exit({normal,could_not_verify});
                     {found,_}->
                                     epc_sgw_registry:update_session({
                                                         Uid
                                                         ,make_ref(),
-                                                        self()})
+                                                        self()}),
+                                    gen_tcp:send(State#state.socket,term_to_binary({verification_succesful,Uid}))
               end,
     State#state{isVerified=Verified};
 
@@ -89,8 +91,9 @@ handle_message(messages,State)->
     State;
 
 handle_message(Message,State)->
+    NewState=State#state{messages=[Message|State#state.messages]},
     gen_tcp:send(State#state.socket,term_to_binary({unkown_message,Message})),
-    State.
+    NewState.
 
 update_registry(Uid)->
     Ref=make_ref(),
