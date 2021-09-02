@@ -12,7 +12,7 @@ Composed of :
   3. Package Gateway (PGW)
       - keeps the connection between epc and the internet
       - handles bidirectional communication between SGW and internet
-  4  EPC Client
+  4. EPC Client
       - simulates a connected client(handset) through
       a radiotower (eutran) that exchanges fata with the EPC 
 
