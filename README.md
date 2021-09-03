@@ -17,6 +17,6 @@ Composed of :
       a radiotower (eutran) that exchanges fata with the EPC 
 
 
-Each component is basically a erlang application that might run or not in a distributed mode.
-Currently as a database Mnesia and ETS are used.
+Each component is basically an erlang application that might run or not in a distributed mode.
+Currently a Mnesia database and ETS are use for state tracking of connected clients/sessions.
   
