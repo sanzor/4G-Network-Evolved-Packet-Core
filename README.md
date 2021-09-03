@@ -9,6 +9,7 @@ Composed of :
       - holds the (tcp) connection with the connected client
       - forwards packages from connected client  to PGW
       - forwards messages from PGW to connected client
+      - runs as a process pool for incoming tcp clients
   3. Package Gateway (PGW)
       - keeps the connection between epc and the internet
       - handles bidirectional communication between SGW and internet
