@@ -5,24 +5,26 @@
     socket,
     printerRef
 }).
-
+-define(DB(X),io:format("~p",[X])).
 
 
 start(normal,[])->
-     Pid=spawn(fun()->start()end),
+    Pid=spawn(fun()->start()end),
     {ok,Pid}.
-stop(Reason)->ok.
+stop(_Reason)->ok.
+
 start()->
     epc_mme_server:authorize(application:get_env(epc_client,userId)),
     ClientPid=start_client(),
     ClientPid.
 
-logger_loop(File)->
-    receive
-        Message -> io:format(File,"Received ~p",[Message]),
-                   io:format("Received ~p",[Message]),
-                   logger_loop(File)
-    end.
+
+start_client()->
+    PrinterRef=start_logger_process(),
+    Socket=make_socket_connection(),
+    ClientPid=spawn(fun()->loop(#state{printerRef=PrinterRef,socket=Socket})end),
+    register(cli,ClientPid),
+    ClientPid.
 
 loop(State)->
     receive
@@ -39,30 +41,38 @@ loop(State)->
         {tcp_closed,_Socket}->exit(socket_closed)
     end.
 
-start_client()->
-    Socket=make_socket_connection(),
-    PrinterRef=start_logger_process(),
-    ClientPid=spawn(fun()->loop(#state{printerRef=PrinterRef,socket=Socket})end),
-    register(cl,ClientPid),
-    ClientPid.
+
     
     
 start_logger_process()->
-    {ok,Handle}=file:open(application:get_env(epc_client,printerPath), [write]),
-    register(printer,spawn(fun()->logger_loop(Handle)end)),
+    {ok,Path}=application:get_env(epc_client,printerPath),
+    {ok,Handle}=file:open(Path, [write]),
+    Pid=spawn(fun()->
+                    logger_loop(Handle)
+              end),
+   
+    register(printer,Pid),
+  
     Ref=erlang:monitor(process,whereis(printer)),
     Ref.
+
+logger_loop(File)->
+   
+    receive
+        Message -> io:format(File,"Received ~p",[Message]),
+                   io:format("Received ~p",[Message]),
+                   logger_loop(File)
+    end.
 
 handle_message(Message,_State)->
     printer ! Message.
 
 
 make_socket_connection()->
-
-    {ok,Socket}=gen_tcp:connect(
-                               application:get_env(epc_client,connectPort),
-                               application:get_env(epc_client,address),
+    {ok,Socket}=gen_tcp:connect(element(2,application:get_env(epc_client,address)),
+                                element(2,application:get_env(epc_client,connectPort)),
                                 []),
+    ?DB(socket_cl),
     Socket.
 
      

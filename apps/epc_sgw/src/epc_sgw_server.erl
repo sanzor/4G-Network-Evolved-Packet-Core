@@ -33,7 +33,7 @@ handle_info(timeout,State=#state{sock=S})->
     {noreply,State#state{sessions=Dict}};
 
 
-handle_info({'DOWN',Ref,process,_,Reason},State)->
+handle_info({'DOWN',Ref,process,_,_Reason},State)->
     erlang:demonitor(Ref),
     NewDict=dict:erase(Ref,State#state.sessions),
     {noreply,State#state{sessions=NewDict}}.
@@ -47,7 +47,7 @@ handle_cast({newpid,Pid},State)->
 handle_call({filter,Filter},_,State)->
     {reply,dict:filter(Filter,State#state.sessions),State}.
 
-startFirstChild(Socket)->
+startFirstChild(_Socket)->
     {ok,Port}=application:get_env(listenPort),
     {ok,LSock}=gen_tcp:listen(Port, [binary,{active,true}]),
     {ok,Pid}=epc_sgw_worker_sup:start_child(LSock),

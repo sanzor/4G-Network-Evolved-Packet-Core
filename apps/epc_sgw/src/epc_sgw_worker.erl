@@ -33,9 +33,9 @@ init([Lsock])->
 
 %%%%%%%%%%%%%% callbacks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% 
-handle_call(Message,From,State)->
+handle_call(_Message,_From,State)->
     {reply,State,State}.
-handle_cast(Message,State)->
+handle_cast(_Message,State)->
     {noreply,State}.
 handle_info({tcp_closed,_},State)->
     {stop,socket_closed,State};
@@ -46,7 +46,7 @@ handle_info(timeout,State)->
     create_new_child_procedure(State#state.socket),
     {noreply,State#state{socket=Sock}};
 
-handle_info({tcp,Socket,Message},State)->
+handle_info({tcp,_Socket,Message},State)->
     NewState=handle_socket_message(Message,State),
     {noreply,NewState};
 
@@ -54,10 +54,10 @@ handle_info(Message, State)->
     io:format("Unknown message , out of band: ~p",[Message]),
     {noreply,State}.
 
-terminate(socket_closed,State)->
+terminate(socket_closed,_State)->
     io:format("Socket closed"),
     ok;
-terminate(Reason,State)->
+terminate(Reason,_State)->
     io:format("terminating,reason:~p",[Reason]),
     ok.
 
