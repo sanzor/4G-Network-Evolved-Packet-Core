@@ -41,7 +41,6 @@ loop(State)->
         {tcp_closed,_Socket}->exit(socket_closed)
     end.
 
-
     
     
 start_logger_process()->

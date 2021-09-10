@@ -1,7 +1,7 @@
 -module(epc_sgw_worker).
 -behaviour(gen_server).
 -modified('Date: 1/09/2021').
-
+-define(DB(X),io:format("~p",[X])).
 
 -export([init/1,handle_info/2,handle_call/3,terminate/2,handle_cast/2]).
 -define(tb(X),term_to_binary(X)).
@@ -28,6 +28,7 @@ start_link(Lsock)->
 
 
 init([Lsock])->
+    
     {ok,#state{socket=Lsock},0}.
 
 
@@ -42,15 +43,20 @@ handle_info({tcp_closed,_},State)->
 
 
 handle_info(timeout,State)->
+    
     {ok,Sock}=gen_tcp:accept(State#state.socket),
+   
     create_new_child_procedure(State#state.socket),
+   
     {noreply,State#state{socket=Sock}};
 
 handle_info({tcp,_Socket,Message},State)->
+    ?DB(xxx),
     NewState=handle_socket_message(Message,State),
     {noreply,NewState};
 
 handle_info(Message, State)->
+    
     io:format("Unknown message , out of band: ~p",[Message]),
     {noreply,State}.
 
@@ -69,6 +75,7 @@ handle_socket_message(Raw,State)->
 
 
 handle_message({verify,Uid},State)->
+    
     Verified=case epc_sgw_registry:get_session(Uid) of
                     {not_found,_}-> gen_tcp:send(State#state.socket,term_to_binary({user_not_found,Uid,"Closing socket shortly...."})),
                                     gen_tcp:close(State#state.socket),
