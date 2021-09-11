@@ -4,8 +4,6 @@
 -define(DB(X),io:format("~p",[X])).
 
 -export([init/1,handle_info/2,handle_call/3,terminate/2,handle_cast/2]).
--define(tb(X),term_to_binary(X)).
--define(fb(X),binary_to_term(Msg)).
 -export([start_link/1]).
 
 
@@ -39,19 +37,19 @@ handle_call(_Message,_From,State)->
 handle_cast(_Message,State)->
     {noreply,State}.
 handle_info({tcp_closed,_},State)->
+   
     {stop,socket_closed,State};
 
 
 handle_info(timeout,State)->
     
     {ok,Sock}=gen_tcp:accept(State#state.socket),
-   
+     
     create_new_child_procedure(State#state.socket),
-   
     {noreply,State#state{socket=Sock}};
 
 handle_info({tcp,_Socket,Message},State)->
-    ?DB(xxx),
+  
     NewState=handle_socket_message(Message,State),
     {noreply,NewState};
 
@@ -75,7 +73,7 @@ handle_socket_message(Raw,State)->
 
 
 handle_message({verify,Uid},State)->
-    
+  
     Verified=case epc_sgw_registry:get_session(Uid) of
                     {not_found,_}-> gen_tcp:send(State#state.socket,term_to_binary({user_not_found,Uid,"Closing socket shortly...."})),
                                     gen_tcp:close(State#state.socket),

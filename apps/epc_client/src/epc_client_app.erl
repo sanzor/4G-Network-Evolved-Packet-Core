@@ -14,18 +14,22 @@ start(normal,[])->
 stop(_Reason)->ok.
 
 start()->
-    epc_mme_server:authorize(application:get_env(epc_client,userId)),
     ClientPid=start_client(),
     ClientPid.
 
 
 start_client()->
-    PrinterRef=start_logger_process(),
-    Socket=make_socket_connection(),
+    epc_mme_server:authorize(application:get_env(epc_client,userId)),
+    {PrinterRef,Socket}=init_dependencies(),
     ClientPid=spawn(fun()->loop(#state{printerRef=PrinterRef,socket=Socket})end),
     register(cli,ClientPid),
     ClientPid.
 
+init_dependencies()->
+    PrinterRef=start_logger_process(),
+    Socket=make_socket_connection(),
+    {PrinterRef,Socket}.
+    
 loop(State)->
     receive
         {tcp,v,Id}->
@@ -33,12 +37,14 @@ loop(State)->
                 gen_tcp:send(State#state.socket,Data,Data),
                 loop(State);
         {'DOWN',_Ref,process,_PrinterPID,Reason}->
+               
                 io:format("Printer is down, reason:[~p]",[Reason]),
                 exit(normal);
         {tcp,Socket,Message} -> 
             handle_message(Message,State),
             loop(Socket);
-        {tcp_closed,_Socket}->exit(socket_closed)
+        {tcp_closed,_Socket}->
+            exit(socket_closed)
     end.
 
     
@@ -71,7 +77,6 @@ make_socket_connection()->
     {ok,Socket}=gen_tcp:connect(element(2,application:get_env(epc_client,address)),
                                 element(2,application:get_env(epc_client,connectPort)),
                                 []),
-    ?DB(socket_cl),
     Socket.
 
      
