@@ -19,12 +19,20 @@ start()->
 
 
 start_client()->
-    epc_mme_server:authorize(application:get_env(epc_client,userId)),
+    UserData=init_user_data(application:get_all_env()),
+    {_,UserId}=epc_mme_server:authorize(UserData),
     {PrinterRef,Socket}=init_dependencies(),
     ClientPid=spawn(fun()->loop(#state{printerRef=PrinterRef,socket=Socket})end),
+    ClientPid ! {epc_client,verify,UserId},
     register(cli,ClientPid),
     ClientPid.
 
+
+init_user_data(Config)->
+    ClientId=proplists:get_value(userId, Config),
+    ClientName=proplists:get_value(username, Config),
+    Phone=proplists:get_value(phoneNumber, Config),
+    {ClientId,ClientName,Phone}.
 init_dependencies()->
     PrinterRef=start_logger_process(),
     Socket=make_socket_connection(),
@@ -32,9 +40,9 @@ init_dependencies()->
     
 loop(State)->
     receive
-        {tcp,v,Id}->
+        {epc_client,verify,Id}->
                 Data=term_to_binary({verify,Id}),
-                gen_tcp:send(State#state.socket,Data,Data),
+                gen_tcp:send(State#state.socket,Data),
                 loop(State);
         {'DOWN',_Ref,process,_PrinterPID,Reason}->
                

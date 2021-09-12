@@ -31,13 +31,15 @@ init_per_suite(_Config)->
     {hostname,"localhost"},
     {userid,33},
     {username,44},
-    {number,"0726709009"}
+    {number,"0726709009"},
+    {targetNode,'adi@DESKTOP-GOMS8S8'}
     ].
 
 end_per_suite(_Config)->
     ok.
 
 init_per_testcase(_Case,_Config)->
+
     _Config.
 
 end_per_testcase(_Case,_Config)->ok.
@@ -45,7 +47,7 @@ end_per_testcase(_Case,_Config)->ok.
 
 all()->
     [
-        can_authorize,
+        % can_authorize,
         can_connect_socket
     ].
 
