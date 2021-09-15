@@ -49,6 +49,6 @@ handle_call({filter,Filter},_,State)->
 
 startFirstChild(_Socket)->
     {ok,Port}=application:get_env(listenPort),
-    {ok,LSock}=gen_tcp:listen(Port, [binary,{active,true}]),
+    {ok,LSock}=gen_tcp:listen(Port, [binary]),
     {ok,Pid}=epc_sgw_worker_sup:start_child(LSock),
     Pid.

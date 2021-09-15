@@ -26,7 +26,6 @@ start_link(Lsock)->
 
 
 init([Lsock])->
-    
     {ok,#state{socket=Lsock},0}.
 
 
@@ -44,12 +43,11 @@ handle_info({tcp_closed,_},State)->
 handle_info(timeout,State)->
     
     {ok,Sock}=gen_tcp:accept(State#state.socket),
-     
     create_new_child_procedure(State#state.socket),
     {noreply,State#state{socket=Sock}};
 
 handle_info({tcp,_Socket,Message},State)->
-  
+    ?DB(socket_message),
     NewState=handle_socket_message(Message,State),
     {noreply,NewState};
 
@@ -73,9 +71,9 @@ handle_socket_message(Raw,State)->
 
 
 handle_message({verify,Uid},State)->
-  
+   
     Verified=case epc_sgw_registry:get_session(Uid) of
-                    {not_found,_}-> gen_tcp:send(State#state.socket,term_to_binary({user_not_found,Uid,"Closing socket shortly...."})),
+                    {not_found,_}-> ?DB(user_not_found),
                                     gen_tcp:close(State#state.socket),
                                     exit({normal,could_not_verify});
                     {found,_}->
