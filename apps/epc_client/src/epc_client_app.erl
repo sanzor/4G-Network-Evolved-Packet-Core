@@ -20,55 +20,30 @@ start()->
 
 start_client()->
     Config=application:get_all_env(),
-    UserData=init_user_data(Config),
-    {_Something,UserId}=epc_mme_api:authorize(UserData),
-    {PrinterRef,Socket}=init_component_processes(Config),
-   
-    ClientPid=spawn(fun()->loop(#state{printerRef=PrinterRef,socket=Socket})end),
-    ClientPid ! {epc_client,verify,UserId},
-   
+    ClientPid=spawn(fun()-> start(Config)end),
+    ClientPid ! {epc_client,verify,?EN(userId, Config)},
     register(cli,ClientPid),
     ClientPid.
 
 
-init_user_data(Config)->
-    ClientId=?EN(userId, Config),
-    ClientName=?EN(username, Config),
-    Phone=?EN(phoneNumber, Config),
-   
-    {ClientId,ClientName,Phone}.
 
-init_component_processes(Config)->
-    PrinterRef=start_logger_process(Config),
-    Address=?EN(address,Config),
-    Port=?EN(connectPort,Config),
-    Socket=make_socket_connection(Address,Port),
-    {PrinterRef,Socket}.
   
-make_socket_connection(Address,Port)->
-    {ok,Socket}=gen_tcp:connect(Address,Port,[binary]),
-    
-    Socket.
+
+start(Config)->
+    {_Something,_UserId}=epc_mme_api:authorize({?EN(userId, Config),
+                                                ?EN(username, Config),
+                                                ?EN(phoneNumber, Config)}),
+    Socket=gen_tcp:connect(?EN(address,Config),?EN(port,Config),[binary]),
+    PrinterRef=start_logger_process(Config),
+    loop(#state{printerRef=PrinterRef,socket=Socket}).
+
 
 loop(State)->
    
     receive
         {epc_client,verify,Id}->
-                
                 Data=term_to_binary({verify,Id}),
-               
-                try gen_tcp:send(State#state.socket,Data) of
-                    Something -> ?DB({received,Something})
-                catch
-                    Err:Reason->?DB({got_err,Err,Reason}),
-                                ?DB(exiting),
-                                exit(broken)
-                end,
-                receive 
-                    Msg-> ?DB({received_on_socket,Msg})
-                after 3000 ->
-                    exit(did_not_respond_in_time)
-                end,
+                gen_tcp:send(State#state.socket,Data), 
                 loop(State);
         {'DOWN',_Ref,process,_PrinterPID,Reason}->
                
@@ -84,12 +59,11 @@ loop(State)->
     
     
 start_logger_process(Config)->
-    Path=?EN(printerPath,Config),
-   
-    {ok,Handle}=file:open(Path, [write]),
     
     
     Pid=spawn(fun()->
+                    Path=?EN(printerPath,Config),
+                    {ok,Handle}=file:open(Path, [write]),
                     logger_loop(Handle)
               end),
               erlang:is_process_alive(Pid),
@@ -100,7 +74,8 @@ start_logger_process(Config)->
 
 logger_loop(File)->
     receive
-        Message -> io:format(File,"Received ~p",[Message]),
+        Message -> ?
+                   io:format(File,"Received ~p",[Message]),
                    io:format("Received ~p",[Message]),
                    logger_loop(File)
     end.

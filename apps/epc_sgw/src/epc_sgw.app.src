@@ -11,7 +11,7 @@
                   epc_sgw_worker_sup,
                   epc_sgw_worker,
                   epc_sgw_api]},
-        {env,[{listenPort,8081},{address,"127.0.0.1"}]},
+        {env,[{listenPort,8081},{address,"localhost"}]},
         {applications,[stdlib,kernel]},
         {mod,{epc_sgw_app,[]}}
    ]
