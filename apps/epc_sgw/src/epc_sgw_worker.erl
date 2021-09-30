@@ -48,7 +48,7 @@ handle_info(timeout,State)->
 
 handle_info({tcp,_Socket,Message},State)->
     ?DB(socket_message),
-    NewState=handle_socket_message(Message,State),
+     NewState=handle_socket_message(Message,State),
     {noreply,NewState};
 
 handle_info(Message, State)->
