@@ -10,12 +10,12 @@
 -define(EN(Key,Config),proplists:get_value(Key, Config)).
 start(normal,[])->
     Pid=spawn(fun()->st()end),
+    ?DB(whereis(cli)),
     {ok,Pid}.
 stop(_Reason)->ok.
 
 st()->
     ClientPid=start_client(),
-    ?DB(ClientPid),
     ClientPid.
 
 
