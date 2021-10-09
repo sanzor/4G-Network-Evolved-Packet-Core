@@ -6,23 +6,25 @@
     spawner,
     printerRef
 }).
--define(DB(X),io:format("~p",[X])).
+-define(DB(X),io:format("~p~n",[X])).
 -define(EN(Key,Config),proplists:get_value(Key, Config)).
 start(normal,[])->
-    Pid=spawn(fun()->start()end),
+    Pid=spawn(fun()->st()end),
     {ok,Pid}.
 stop(_Reason)->ok.
 
-start()->
+st()->
     ClientPid=start_client(),
+    ?DB(ClientPid),
     ClientPid.
 
 
 start_client()->
     
     Config=application:get_all_env(),
+    Pid=self(),
+    ClientPid= spawn(fun()-> startC(Config,Pid) end),
    
-    ClientPid=spawn(fun()-> startC(Config,self())end),
     ClientPid ! {epc_client,verify,?EN(userId, Config)},
     receive
         MSG->?DB({got_from_loop,MSG})
@@ -49,14 +51,12 @@ startC(Config,SpawnerPid)->
 
 
 loop(State)->
-    
     receive
         {epc_client,verify,Id}->
                 Data=term_to_binary({verify,Id}),
                 gen_tcp:send(State#state.socket,Data),
                 loop(State);
         {'DOWN',_Ref,process,_PrinterPID,Reason}->
-                io:format("Printer is down, reason:[~p]",[Reason]),
                 exit({normal,Reason});
         {tcp,_Socket,Raw} -> 
             Message=binary_to_term(Raw),
@@ -64,8 +64,8 @@ loop(State)->
             loop(NewState);
         {tcp_closed,_Socket}->
             exit(socket_closed);
-        MSG->?DB({unknown,MSG}),
-             exit(unknown)
+        MSG->?DB(MSG),
+             loop(State)
     end.
 
     
@@ -93,7 +93,7 @@ logger_loop(File)->
     end.
 
 handle_socket_message(Message,_State)->
-     ?DB({{state,_State},{message,Message}}),
+     ?DB({_State#state.spawner,is_process_alive(_State#state.spawner)}),
      _State#state.spawner ! Message,
     _State.
 
