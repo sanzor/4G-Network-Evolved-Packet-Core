@@ -6,19 +6,15 @@
     spawner,
     printerRef
 }).
+
 -define(DB(X),io:format("~p~n",[X])).
 -define(EN(Key,Config),proplists:get_value(Key, Config)).
+
 start(normal,[])->
-    Pid=spawn(fun()->st()end),
-    ?DB(whereis(cli)),
-    {ok,Pid}.
+    Pp=start_client(),   
+    {ok,Pp}.
+
 stop(_Reason)->ok.
-
-st()->
-    ClientPid=start_client(),
-    ClientPid.
-
-
 start_client()->
     
     Config=application:get_all_env(),
@@ -27,7 +23,7 @@ start_client()->
    
     ClientPid ! {epc_client,verify,?EN(userId, Config)},
     receive
-        MSG->?DB({got_from_loop,MSG})
+        _MSG->ok
     after 1500 ->
         exit(timeout_client)
     end,
@@ -52,6 +48,7 @@ startC(Config,SpawnerPid)->
 
 loop(State)->
     receive
+        {command,Command}->gen_tcp:send(State#state.socket,term_to_binary(Command));
         {epc_client,verify,Id}->
                 Data=term_to_binary({verify,Id}),
                 gen_tcp:send(State#state.socket,Data),
@@ -93,7 +90,6 @@ logger_loop(File)->
     end.
 
 handle_socket_message(Message,_State)->
-     ?DB({_State#state.spawner,is_process_alive(_State#state.spawner)}),
      _State#state.spawner ! Message,
     _State.
 
