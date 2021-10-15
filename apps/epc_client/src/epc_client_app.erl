@@ -39,7 +39,6 @@ startC(Config,SpawnerPid)->
     {_Something,_UserId}=epc_mme_api:authorize({?EN(userId, Config),
                                                 ?EN(username, Config),
                                                 ?EN(phoneNumber, Config)}),
-  
     {ok,Socket}=gen_tcp:connect(?EN(address,Config),?EN(connectPort,Config),[binary]),
    
     PrinterRef=start_logger_process(Config),
