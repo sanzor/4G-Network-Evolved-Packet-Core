@@ -6,9 +6,11 @@
 -record(state,{
     userId,
     userName,
-    phone
+    phone,
+    authorized=false
 }).
 -define(NAME,?MODULE).
+-define(AUTH_TIMEOUT,5000).
 % api
 
 start_link()->
@@ -41,9 +43,8 @@ logged_out({call,_From},{login,{UserId,Username,PhoneNumber}},State)->
     end,
     Return.
 
-logged_in_not_verified(_,_,State#state{userId=UserId})->
-    {_Something,_UserId}=epc_mme_api:authorize({UserId,Username,PhoneNumber}),
-    {ok,Socket}=gen_tcp:connect(Address, Port, Opts)
+logged_in_not_verified(_,_,State=#state{userId=UserId})->
+    {keep_state,logged_in_not_verified,State}.
 
 
 
