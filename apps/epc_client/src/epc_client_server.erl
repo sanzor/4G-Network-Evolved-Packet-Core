@@ -10,7 +10,7 @@
     authorized=false
 }).
 -define(NAME,?MODULE).
--define(AUTH_TIMEOUT,5000).
+-define(VERIFY_CONNECT_TIMEOUT,5000).
 % api
 
 start_link()->
@@ -45,6 +45,15 @@ logged_out({call,_From},{login,{UserId,Username,PhoneNumber}},State)->
 
 logged_in_not_verified(_,_,State=#state{userId=UserId})->
     {keep_state,logged_in_not_verified,State}.
+
+
+
+handle_event({call,From},{connect,Address,Port},State)->
+    {ok,Socket}=gen_tcp:connect(Address,Port,[binary]),
+    erlang:send_after(?VERIFY_CONNECT_TIMEOUT, self(), {received,verify_ack}),
+    {} % move to new state and check the timeout !
+    
+
 
 
 
