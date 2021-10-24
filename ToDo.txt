@@ -13,3 +13,5 @@ to do:
 todo2:
 replace mnesia with an ETS with a global process
 change dictionary with an ETS
+
+
