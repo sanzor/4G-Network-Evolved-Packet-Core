@@ -15,7 +15,7 @@
 % api
 
 start_link()->
-    gen_statem:start_link({local,?NAME},?MODULE, [],[]).
+    gen_statem:start_link({local,?NAME},?MODULE,[],[]).
 
 login(Data)->
     gen_statem:call(?NAME,{login,Data},3000).
@@ -29,7 +29,7 @@ connect(UserId,ConnectData)->
 
 % handlers
 callback_mode()->state_functions.
-init([])->
+init(_)->
     {ok,logged_out,#state{}}.
 
 

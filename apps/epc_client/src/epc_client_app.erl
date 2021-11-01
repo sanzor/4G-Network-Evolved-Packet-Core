@@ -11,12 +11,15 @@
 -define(EN(Key,Config),proplists:get_value(Key, Config)).
 
 start(normal,[])->
-    Pp=start_client(),   
-    {ok,Pp}.
+    {ok,Pid}=epc_client_main_sup:start_link(),
+    {ok,Pid}.
 
 stop(_Reason)->ok.
-start_client()->
-    
+
+  
+
+
+start_client_deprecated()->
     Config=application:get_all_env(),
     Pid=self(),
     ClientPid= spawn(fun()-> startC(Config,Pid) end),
@@ -29,10 +32,6 @@ start_client()->
     end,
     register(cli,ClientPid),
     ClientPid.
-
-
-
-  
 
 startC(Config,SpawnerPid)->
    
