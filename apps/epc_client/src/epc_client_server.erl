@@ -1,6 +1,6 @@
 -module(epc_client_server).
 -behaviour(gen_statem).
--export([login/1,quit/0,connect/1,start_link/0]).
+-export([login/1,quit/0,connect/2,start_link/0]).
 -export([init/1,handle_event/3,callback_mode/0]).
 -export([logged_out/3,logged_in_not_verified/3,waiting_verification/3]).
 -record(state,{
@@ -23,8 +23,8 @@ login(Data)->
 quit()->
     gen_statem:cast({local,?NAME},quit).
 
-connect(UserId)->
-    gen_statem:call({local,?MODULE},{connect,UserId}).
+connect(UserId,ConnectData)->
+    gen_statem:call({local,?MODULE},{connect,{UserId,ConnectData}}).
 
 
 % handlers
@@ -38,24 +38,34 @@ logged_out({call,_From},{quit,_},_State)->
 logged_out({call,_From},{login,{UserId,Username,PhoneNumber}},State)->
     Return= try 
     {_Something,_UserId}=epc_mme_api:authorize({UserId,Username,PhoneNumber}),
-    gen_statem:reply(?NAME,{ok,logged_in,UserId}),
+    
+    gen_statem:reply(_From,{ok,logged_in,UserId}),
     {next_state,logged_in_not_verified,State#state{userId=UserId,userName=Username,phone=PhoneNumber}}
     catch
         Error:Reason -> 
-        gen_statem:reply(?NAME,{error,Error,Reason}),
+        gen_statem:reply(_From,{error,Error,Reason}),
         {keep_state,logged_out,State}
     end,
-    Return.
+    Return;
+logged_out({call,From},_Message,_State)->
+    gen_statem:reply(From,{invalid_message,_Message}),
+    {keep_state,logged_out,_State}.
 
 % event that comes on user pressing connect (already logged in)
-logged_in_not_verified({call,_From},{connect,Address,Port},State)->
+logged_in_not_verified({call,_From},{connect,{Address,Port}},State)->
     {ok,Socket}=gen_tcp:connect(Address,Port,[binary]),
     erlang:send_after(?VERIFY_CONNECT_TIMEOUT, self(), {send_after_message,verify_ack}),
-    {next_state,waiting_verification,State#state{socket=Socket},[]}. % move to new state and check the timeout !
+    {next_state,waiting_verification,State#state{socket=Socket},[]}; % move to new state and check the timeout !
+logged_in_not_verified({call,From},{login,Data},State)->
+    gen_statem:reply(From, {already_logged_in,Data}),
+    {keep_state,logged_in_not_verified,State}.
 
 waiting_verification({call,_From},{tcp,_Socket,_Raw},State)->
-    {keep_state,waiting_verification,State#state{authorized=true}}.
+    {keep_state,waiting_verification,State#state{authorized=true}};
 
+waiting_verification({call,From},_Message,State)->
+    gen_statem:reply(From, {invalid_message,_Message}),
+    {keep_state,waiting_verification,State}.
 % event that comes triggered by erlang:send_after
 % checks if client was verified
 handle_event({call,_From},{send_after,verify_ack},State=#state{authorized=A})->
