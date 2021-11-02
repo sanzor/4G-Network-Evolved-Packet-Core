@@ -39,7 +39,10 @@ end_per_suite(_Config)->
     ok.
 
 init_per_testcase(_Case,_Config)->
-
+     case application:which_applications() of 
+        undefined -> application:start(epc_client);
+        _Pid ->ok
+     end,
     _Config.
 
 end_per_testcase(_Case,_Config)->ok.
@@ -63,6 +66,8 @@ can_authorize(Config)->
     ?assertMatch(ok,epc_mme_api:authorize({?GET(userid,Config),
                            ?GET(username,Config),
                            ?GET(phone,Config)}) andalso ok).
+
+
                 
                 
               

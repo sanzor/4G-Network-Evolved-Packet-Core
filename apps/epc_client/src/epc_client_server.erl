@@ -39,7 +39,7 @@ logged_out({call,_From},{login,{UserId,Username,PhoneNumber}},State)->
     Return= try 
     {_Something,_UserId}=epc_mme_api:authorize({UserId,Username,PhoneNumber}),
     
-    gen_statem:reply(_From,{ok,logged_in,UserId}),
+    gen_statem:reply(_From,{ok,{logged_in,UserId}}),
     {next_state,logged_in_not_verified,State#state{userId=UserId,userName=Username,phone=PhoneNumber}}
     catch
         Error:Reason -> 

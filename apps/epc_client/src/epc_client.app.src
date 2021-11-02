@@ -4,7 +4,7 @@
       {applications,[stdlib,kernel,epc_mme,epc_sgw]},
       {author,"bercovici adrian"},
       {vsn,"0.1.1"},
-      {modules,[epc_client_app]},
+      {modules,[epc_client_app,epc_client_main_sup,epc_client_server,epc_client_api]},
       {mod,{epc_client_app,[]}},
       {env,[{userId,33},
             {username,"adrian bercovici"},

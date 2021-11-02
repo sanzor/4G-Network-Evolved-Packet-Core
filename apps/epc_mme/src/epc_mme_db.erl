@@ -15,12 +15,7 @@
     number
 }).
     
--spec write(Table::atom(),term())->ok.
-write(Table,Record)->
-    mnesia:dirty_write(Table,Record).
--spec delete(Table::atom(),term())->ok.
-delete(Table,Id)->
-    mnesia:dirty_delete(Table,Id).
+
 
 read(Table,Id)->
     mnesia:dirty_read(Table, Id).
@@ -38,9 +33,9 @@ getPosition(Id)->
         Position ->Position
     end.
 
-writeUser(Record=#user{id=Id})->write(users,Record).
-updateUser(Record=#user{id=Id})->write(users,Record).
-writePosition(Record=#position{id=Id})->write(positions,Record).
+writeUser(Record=#user{id=_Id})->write(users,Record).
+updateUser(Record=#user{id=_Id})->write(users,Record).
+writePosition(Record=#position{id=_Id})->write(positions,Record).
 
    
 
@@ -50,5 +45,13 @@ deleteUser(Id)->
 
 deletePosition(Id)->
     delete(positions,Id).
+
+
+-spec write(Table::atom(),term())->ok.
+write(Table,Record)->
+    mnesia:dirty_write(Table,Record).
+-spec delete(Table::atom(),term())->ok.
+delete(Table,Id)->
+    mnesia:dirty_delete(Table,Id).
 
     
