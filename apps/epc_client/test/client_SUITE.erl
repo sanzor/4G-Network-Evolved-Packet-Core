@@ -28,15 +28,20 @@ end_per_suite(_Config)->
     ok.
 
 init_per_testcase(_Case,_Config)->
-     case proplists:lookup(epc_client, application:which_applications()) of
+    case proplists:lookup(epc_client, application:which_applications()) of
         none -> application:ensure_started(epc_client);
         _ -> application:stop(epc_client),
              application:ensure_started(epc_client)
      end,
+    case whereis(epc_client_server) of 
+        undefined -> io:format("EPC Client not alive"),
+                    throw(server_not_alive);
+        true -> ok
+    end,
     _Config.
 
 end_per_testcase(_Case,_Config)->
-    case proplists:lookup(epc_client, application:which_applications()) of
+    case proplists:lookup(epc_client_SERV, application:which_applications()) of
         none -> ok;
         _ -> application:stop(epc_client)
     end,
@@ -50,5 +55,8 @@ all()->
     ].
 
 can_login(Config)->
-    {X,_Y}=epc_client_api:login(?GET(username,Config),{?GET(hostname,Config),?GET(port,Config)}),
+    
+     io:format("Epc client server is defined: ~p",[whereis(epc_client_server)]),
+    
+    {X,_Y}=epc_client_api:login(?GET(username,Config),?GET(hostname,Config),?GET(port,Config)),
     ?assertEqual(ok,X).

@@ -51,7 +51,7 @@ end_per_testcase(_Case,_Config)->ok.
 all()->
     [
         % can_authorize,
-        can_connect_socket
+        %can_connect_socket
     ].
 
 can_connect_socket(Config)->
@@ -72,4 +72,3 @@ can_authorize(Config)->
                 
               
             
-
